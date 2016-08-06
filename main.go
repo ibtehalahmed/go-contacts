@@ -1,30 +1,23 @@
 package main
 import (
-    "github.com/gin-gonic/gin"
-    "gopkg.in/mgo.v2"
-    "github.com/ibtehal/go-contacts/controllers"
+	"github.com/gin-gonic/gin"
+	"github.com/ibtehal/go-contacts/controllers"
+
 )
 
+
+
+
 func main() {
+
+
 	r := gin.Default()
-	con := controllers.NewContactController(getSession())
-
-	r.POST("/contact", con.Add)
-	r.GET("/contact/:_id", con.GetOne)
-	r.GET("/contact", con.GetAll)
-	r.PUT("/contact/:_id", con.Update)
-	r.DELETE("/contact/:_id", con.Delete)
-
+	con := controllers.NewContactController()
+	r.POST("/contacts/contact/:id", con.Add)
+	r.DELETE("/contacts/contact/:id",con.Delete)
+	r.GET("/contacts/contact/:id",con.Get)
+	r.PUT("/contacts/contact/:id",con.Update)
 	r.Run()
 }
 
-func getSession() *mgo.Session {
-    // Connect to our local mongo
-    s, err := mgo.Dial("mongodb://localhost")
 
-    // Check if connection error, is mongo running?
-    if err != nil {
-        panic(err)
-    }
-    return s
-}

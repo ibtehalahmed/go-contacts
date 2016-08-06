@@ -1,66 +1,65 @@
 package controllers
 import (
-    "fmt"
-    "gopkg.in/mgo.v2"
-    "github.com/gin-gonic/gin"
-    "gopkg.in/mgo.v2/bson"
-    "github.com/ibtehal/go-contacts/models"
+	"flag"
+	"fmt"
+	"github.com/gin-gonic/gin"
+	"log"
+	elastigo "github.com/mattbaird/elastigo/lib"
 )
 
-type Contact struct { Name string `json:"name" bson:"name"`
-                      Phone string `json:"phone" bson:"phone"`
-                      Id     bson.ObjectId `json:"id" bson:"_id"`
+var (
+	host *string = flag.String("host", "localhost", "Elasticsearch Host")
+)
+
+type Contact struct {
+	Name string
+	Phone string
 }
+
 type (
-    ContactController struct{session *mgo.Session}
+	ContactController struct{}
 )
 
-func NewContactController(s *mgo.Session) *ContactController {
-    return &ContactController{s}
+func NewContactController() *ContactController {
+	return &ContactController{}
 }
 
-func (con ContactController) Add(c *gin.Context) {
+func (con ContactController) Add(g *gin.Context)  {
+	id:=g.Param("id")
 
-    a := con.session.DB("contacts").C("contacts")
-    contact := models.Contact{}
-    contact.Id = bson.NewObjectId()
-    c.Bind(&contact)
-    a.Insert(contact)
+	contact := Contact{}
+	g.Bind(&contact)
 
+	c := elastigo.NewConn()
+	c.Domain = *host
+	// Index a doc using Structs
+	r, _ := c.Index("contacts", "contact", id, nil, Contact{contact.Name, contact.Phone})
+	log.Printf("post: %v", r.Exists)
 }
 
-func (con ContactController) GetOne(c *gin.Context) {
-    id := bson.M{"_id": bson.ObjectIdHex(c.Param("_id"))}
-    m := models.Contact{}
-    a := con.session.DB("contacts").C("contacts")
-    a.Find(id).One(&m)
-    fmt.Println(m.Name)
+func (con ContactController) Update(g *gin.Context){
+	id:=g.Param("id")
+	contact := Contact{}
+	g.Bind(&contact)
+	c := elastigo.NewConn()
+	c.Domain = *host
+	// Index a doc using Structs
+	r, _ := c.Index("contacts", "contact", id, nil, Contact{contact.Name, contact.Phone})
+	log.Printf("put: %v", r.Exists)
 }
 
-func (con ContactController) GetAll(c *gin.Context) {
-
-    contacts := []models.Contact{}
-    a := con.session.DB("contacts").C("contacts")
-    a.Find(nil).Sort("-updated_on").All(&contacts)
-
+func (con ContactController) Delete(g *gin.Context)  {
+	id:=g.Param("id")
+	c := elastigo.NewConn()
+	c.Domain = *host
+	r, _ := c.Delete("contacts","contact",id, nil)
+	log.Printf("Delete: %v", r.Exists)
 }
 
-func (con ContactController) Update(c *gin.Context) {
-
-    a := con.session.DB("contacts").C("contacts")
-    contact := models.Contact{}
-    c.Bind(&contact)
-
-    query := bson.M{"_id": bson.ObjectIdHex(c.Param("_id"))}
-    doc := bson.M{
-        "name": contact.Name,
-        "phone": contact.Phone,
-    }
-    a.Update(query, doc)
-}
-func (con ContactController) Delete(c *gin.Context) {
-    a := con.session.DB("contacts").C("contacts")
-    query := bson.M{"_id": bson.ObjectIdHex(c.Param("_id"))}
-    a.Remove(query)
-
+func (con ContactController) Get(g *gin.Context){
+	id:=g.Param("id")
+	c := elastigo.NewConn()
+	c.Domain = *host
+	response, _:= c.Get("contacts","contact", id, nil)
+	fmt.Println(response)
 }
