@@ -1,5 +1,6 @@
 package controllers
 import (
+	"template"
 	"flag"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -57,9 +58,27 @@ func (con ContactController) Delete(g *gin.Context)  {
 }
 
 func (con ContactController) Get(g *gin.Context){
-	id:=g.Param("id")
+	//id:=g.Param("id")
 	c := elastigo.NewConn()
 	c.Domain = *host
-	response, _:= c.Get("contacts","contact", id, nil)
-	fmt.Println(response)
+	response, _:= c.SearchUri("contacts","contact",nil)
+	for i := 0; i < len(response.Hits.Hits); i++ {
+		fmt.Println(response.Hits.Hits[i].Id)
+	}
+
 }
+
+func (con ContactController) SearchByName(g *gin.Context){
+	name :=g.Param("name")
+	
+	searchjson :=`{
+			"query" : {"term" : { "Name" : name } }
+		   }`
+	c := elastigo.NewConn()
+	c.Domain = *host
+	response, _:= c.Search("contacts","contact",nil,searchjson)
+	for i := 0; i < len(response.Hits.Hits); i++ {
+		fmt.Println(response.Hits.Hits[i].Id)
+	}
+}
+
