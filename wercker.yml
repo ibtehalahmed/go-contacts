@@ -27,6 +27,10 @@ build:
     - setup-go-workspace
 
     # Gets the dependencies
+    - script:
+        name: go get
+        code: |
+          go get
 
     # Build the project
     - script:
