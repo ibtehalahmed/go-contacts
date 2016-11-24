@@ -66,5 +66,5 @@
     after-steps:
       - slack-notifier:
         url: https://hooks.slack.com/services/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
-        channel: notifier
+        channel: contact
         username: wercker
