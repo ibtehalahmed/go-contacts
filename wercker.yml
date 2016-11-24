@@ -34,17 +34,6 @@
           code: |
             go get -u github.com/tools/godep
 
-     # - script:
-      #    name: show all environment variables
-       #   code: |
-        #      env
-
-      - script:
-          name: install dependencies
-          code: |
-            godep restore ./...
-            godep save ./...
-
       # Build the project
       - script:
           name: go build
@@ -52,11 +41,16 @@
             go build
             ls
             cp -rp . "$WERCKER_OUTPUT_DIR"
+      # Before test
+      - script:
+          name: before test
+          code: |
+            export GIN_MODE=release
       # Test the project
       - script:
           name: go test
           code: |
-            go test $(go list ./... | grep -v /vendor/) -timeout 3h
+            go test $(go list ./... | grep -v /vendor/) -v
     after-steps:
       - slack-notifier:
         url: https://hooks.slack.com/services/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
