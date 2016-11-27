@@ -7,9 +7,9 @@ import (
     "github.com/ibtehal/go-contacts/models"
 )
 
-type Contact struct { Name string `json:"name" bson:"name"`
+type Contact struct { Name  string `json:"name" bson:"name"`
                       Phone string `json:"phone" bson:"phone"`
-                      Id     bson.ObjectId `json:"id" bson:"_id"`
+                      Id    bson.ObjectId `json:"id" bson:"_id"`
 }
 type (
     ContactController struct{session *mgo.Session}
