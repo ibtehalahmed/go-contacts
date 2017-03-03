@@ -2,9 +2,6 @@
 	"ImportPath": "github.com/ibtehal/go-contacts",
 	"GoVersion": "go1.6",
 	"GodepVersion": "v74",
-	"Packages": [
-		"./..."
-	],
 	"Deps": [
 		{
 			"ImportPath": "github.com/gin-gonic/gin",
